@@ -5,6 +5,7 @@ A modern web application to adjust SRT subtitle timings. Shift entire files or s
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
@@ -48,8 +49,6 @@ npm start
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Development Mode
-
 ```bash
 # Start server with auto-reload
 npm run dev:server
@@ -57,6 +56,27 @@ npm run dev:server
 # In another terminal, watch for CSS changes
 npm run css:watch
 ```
+
+### 🐳 Docker
+
+The easiest way to run the app - no Node.js required!
+
+```bash
+# Clone the repository
+git clone https://github.com/DevWael/subtitle-shifter.git
+cd subtitle-shifter
+
+# Run with Docker Compose
+docker compose up -d
+
+# Or build and run manually
+docker build -t subtitle-shifter .
+docker run -p 3000:3000 subtitle-shifter
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+To stop: `docker compose down`
 
 ## 🎮 Usage
 

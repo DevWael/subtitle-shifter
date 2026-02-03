@@ -1,0 +1,16 @@
+services:
+  subtitle-shifter:
+    build: .
+    container_name: subtitle-shifter
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    # Optional: Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M

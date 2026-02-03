@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build artifacts (rebuilt in container)
+public/css/styles.css
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in image)
+README.md
+LICENSE
+docs/
+
+# Development files
+_bmad/
+_bmad-output/
+.agent/
+*.md
+
+# IDE/Editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

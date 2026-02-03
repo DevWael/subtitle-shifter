@@ -1,0 +1,299 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F6F8FA;
+    --bg-card: #FFFFFF;
+    --border: #E5E7EB;
+    --accent: #16A34A;
+    --accent-hover: #15803D;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+  }
+
+  .dark {
+    --bg-primary: #0D1117;
+    --bg-secondary: #161B22;
+    --bg-card: #21262D;
+    --border: #30363D;
+    --accent: #4ADE80;
+    --accent-hover: #22C55E;
+    --text-primary: #E6EDF3;
+    --text-secondary: #8B949E;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Card styles with glassmorphism */
+  .card {
+    @apply rounded-2xl p-6 transition-all duration-300;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .card {
+    background: rgba(33, 38, 45, 0.8);
+    backdrop-filter: blur(8px);
+  }
+
+  .card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Button styles */
+  .btn {
+    @apply px-6 py-3 rounded-xl font-semibold transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-offset-2 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn text-white;
+    background: var(--accent);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:focus {
+    @apply ring-green-500;
+  }
+
+  .dark .btn-primary:focus {
+    @apply ring-offset-gray-900;
+  }
+
+  .btn-secondary {
+    @apply btn;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg-card);
+    border-color: var(--accent);
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-green-500;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+
+  .input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .input:focus {
+    border-color: var(--accent);
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    @apply border-2 border-dashed rounded-2xl p-8 text-center 
+           transition-all duration-300 cursor-pointer;
+    border-color: var(--border);
+    background: var(--bg-secondary);
+  }
+
+  .upload-zone:hover,
+  .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(74, 222, 128, 0.05);
+  }
+
+  .dark .upload-zone:hover,
+  .dark .upload-zone.drag-over {
+    background: rgba(74, 222, 128, 0.1);
+  }
+
+  /* Toggle switch */
+  .toggle-container {
+    @apply relative inline-flex items-center cursor-pointer;
+  }
+
+  .toggle-input {
+    @apply sr-only;
+  }
+
+  .toggle-slider {
+    @apply relative w-14 h-7 rounded-full transition-colors duration-300;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .toggle-slider::after {
+    @apply absolute top-1 left-1 w-5 h-5 rounded-full transition-transform duration-300;
+    content: '';
+    background: var(--text-secondary);
+  }
+
+  .toggle-input:checked + .toggle-slider {
+    background: var(--accent);
+  }
+
+  .toggle-input:checked + .toggle-slider::after {
+    @apply translate-x-7 bg-white;
+  }
+
+  /* Preview section */
+  .preview-container {
+    @apply max-h-96 overflow-y-auto rounded-xl;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+  }
+
+  .preview-item {
+    @apply p-4 border-b transition-colors duration-200;
+    border-color: var(--border);
+  }
+
+  .preview-item:last-child {
+    @apply border-b-0;
+  }
+
+  .preview-item:hover {
+    background: rgba(74, 222, 128, 0.05);
+  }
+
+  .timestamp {
+    @apply font-mono text-sm px-2 py-1 rounded;
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--accent);
+  }
+
+  .timestamp.original {
+    @apply line-through opacity-50;
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  /* Radio buttons for mode selection */
+  .mode-option {
+    @apply relative flex items-center gap-3 p-4 rounded-xl cursor-pointer
+           transition-all duration-200;
+    border: 2px solid var(--border);
+  }
+
+  .mode-option:hover {
+    border-color: var(--accent);
+  }
+
+  .mode-option.active {
+    border-color: var(--accent);
+    background: rgba(74, 222, 128, 0.1);
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply w-5 h-5 border-2 rounded-full animate-spin;
+    border-color: transparent;
+    border-top-color: currentColor;
+  }
+
+  /* File info badge */
+  .file-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium;
+    background: rgba(74, 222, 128, 0.15);
+    color: var(--accent);
+  }
+
+  /* Notification/Toast */
+  .toast {
+    @apply fixed bottom-4 right-4 p-4 rounded-xl shadow-lg z-50 
+           transform transition-all duration-300;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .toast.success {
+    border-left: 4px solid var(--accent);
+  }
+
+  .toast.error {
+    border-left: 4px solid #EF4444;
+  }
+
+  .toast.hidden {
+    @apply opacity-0 translate-y-4 pointer-events-none;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full;
+    background: var(--border);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+  }
+
+  /* Fade in animation */
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Slide up animation */
+  .slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

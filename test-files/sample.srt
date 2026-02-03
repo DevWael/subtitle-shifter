@@ -1,0 +1,45 @@
+1
+00:00:01,000 --> 00:00:04,000
+Hello, welcome to the movie.
+
+2
+00:00:05,500 --> 00:00:08,200
+This is a sample subtitle file
+for testing purposes.
+
+3
+00:00:10,000 --> 00:00:13,500
+The timing should be
+perfectly synchronized.
+
+4
+00:00:15,000 --> 00:00:18,000
+Now let's test the subtitle shifter!
+
+5
+00:00:20,000 --> 00:00:23,500
+If you shift by +1000ms,
+this should become 00:00:21,000.
+
+6
+00:00:25,000 --> 00:00:28,000
+And this one should become 00:00:26,000.
+
+7
+00:00:30,000 --> 00:00:33,000
+Testing partial shift:
+This is in the middle range.
+
+8
+00:00:35,000 --> 00:00:38,000
+Still in the partial range
+if set correctly.
+
+9
+00:00:40,000 --> 00:00:43,000
+Outside the partial range now.
+
+10
+00:00:45,000 --> 00:00:48,000
+The end of our test file.
+Thank you for testing!

@@ -34,7 +34,7 @@ A modern web application to adjust SRT subtitle timings. Shift entire files or s
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/subtitle-shifter.git
+git clone https://github.com/DevWael/subtitle-shifter.git
 
 # Navigate to the project
 cd subtitle-shifter

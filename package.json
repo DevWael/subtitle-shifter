@@ -22,7 +22,10 @@
     "sync",
     "desktop"
   ],
-  "author": "Ahmad Wael",
+  "author": {
+    "name": "Ahmad Wael",
+    "email": "dev.ahmedwael@gmail.com"
+  },
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
@@ -71,7 +74,8 @@
         "AppImage",
         "deb"
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "maintainer": "Ahmad Wael <ahmad@bbioon.com>"
     }
   }
 }

@@ -41,6 +41,11 @@ const elements = {
     timeRangeSection: document.getElementById('timeRangeSection'),
     startTime: document.getElementById('startTime'),
     endTime: document.getElementById('endTime'),
+    startTimeRange: document.getElementById('startTimeRange'),
+    endTimeRange: document.getElementById('endTimeRange'),
+    startTimeDisplay: document.getElementById('startTimeDisplay'),
+    endTimeDisplay: document.getElementById('endTimeDisplay'),
+    rangeFill: document.getElementById('rangeFill'),
     offsetInput: document.getElementById('offsetInput'),
     quickMinus500: document.getElementById('quickMinus500'),
     quickPlus500: document.getElementById('quickPlus500'),
@@ -223,6 +228,14 @@ function updateFileInfo(data) {
     elements.duration.textContent = data.duration.end;
     elements.fileInfo.classList.remove('hidden');
 
+    // Store duration info in state for range slider
+    state.durationStartMs = data.duration.startMs;
+    state.durationEndMs = data.duration.endMs;
+
+    // Initialize range sliders
+    initRangeSliders(data.duration.startMs, data.duration.endMs);
+
+    // Set hidden input values
     elements.startTime.value = data.duration.start;
     elements.endTime.value = data.duration.end;
 }
@@ -263,6 +276,85 @@ function setupModeSelection() {
             elements.timeRangeSection.classList.toggle('hidden', mode !== 'partial');
         });
     });
+}
+
+// ============================================
+// RANGE SLIDER
+// ============================================
+
+function initRangeSliders(startMs, endMs) {
+    // Set range boundaries
+    elements.startTimeRange.min = startMs;
+    elements.startTimeRange.max = endMs;
+    elements.startTimeRange.value = startMs;
+
+    elements.endTimeRange.min = startMs;
+    elements.endTimeRange.max = endMs;
+    elements.endTimeRange.value = endMs;
+
+    // Update displays
+    updateRangeDisplay();
+}
+
+function setupRangeSliders() {
+    elements.startTimeRange.addEventListener('input', () => {
+        // Prevent start from exceeding end
+        const startVal = parseInt(elements.startTimeRange.value);
+        const endVal = parseInt(elements.endTimeRange.value);
+        if (startVal > endVal) {
+            elements.startTimeRange.value = endVal;
+        }
+        updateRangeDisplay();
+    });
+
+    elements.endTimeRange.addEventListener('input', () => {
+        // Prevent end from going below start
+        const startVal = parseInt(elements.startTimeRange.value);
+        const endVal = parseInt(elements.endTimeRange.value);
+        if (endVal < startVal) {
+            elements.endTimeRange.value = startVal;
+        }
+        updateRangeDisplay();
+    });
+}
+
+function updateRangeDisplay() {
+    const startMs = parseInt(elements.startTimeRange.value);
+    const endMs = parseInt(elements.endTimeRange.value);
+    const minMs = parseInt(elements.startTimeRange.min);
+    const maxMs = parseInt(elements.startTimeRange.max);
+
+    // Update display labels
+    elements.startTimeDisplay.textContent = formatTimestamp(startMs);
+    elements.endTimeDisplay.textContent = formatTimestamp(endMs);
+
+    // Update hidden inputs
+    elements.startTime.value = formatTimestampFull(startMs);
+    elements.endTime.value = formatTimestampFull(endMs);
+
+    // Update fill bar position
+    const range = maxMs - minMs;
+    if (range > 0) {
+        const leftPercent = ((startMs - minMs) / range) * 100;
+        const rightPercent = ((endMs - minMs) / range) * 100;
+        elements.rangeFill.style.left = `${leftPercent}%`;
+        elements.rangeFill.style.width = `${rightPercent - leftPercent}%`;
+    }
+}
+
+function formatTimestamp(ms) {
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function formatTimestampFull(ms) {
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const milliseconds = ms % 1000;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`;
 }
 
 // ============================================
@@ -502,6 +594,7 @@ function init() {
     initTheme();
     setupUploadZone();
     setupModeSelection();
+    setupRangeSliders();
     setupQuickButtons();
 
     elements.themeToggle.addEventListener('click', toggleTheme);

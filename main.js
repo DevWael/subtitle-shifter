@@ -14,9 +14,9 @@ let mainWindow;
  */
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 800,
-        minWidth: 600,
+        width: 600,
+        height: 700,
+        minWidth: 480,
         minHeight: 500,
         webPreferences: {
             preload: join(__dirname, 'preload.js'),
@@ -24,7 +24,9 @@ function createWindow() {
             nodeIntegration: false,
         },
         titleBarStyle: 'hiddenInset',
+        trafficLightPosition: { x: 12, y: 12 },
         show: false,
+        backgroundColor: '#0D1117',
     });
 
     mainWindow.loadFile(join(__dirname, 'public', 'index.html'));

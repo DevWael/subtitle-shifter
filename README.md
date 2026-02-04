@@ -17,13 +17,6 @@ A modern web application to adjust SRT subtitle timings. Shift entire files or s
 - **🔒 Privacy First** - Files processed in-memory, never stored on server
 - **📱 Responsive** - Works on desktop, tablet, and mobile
 
-## 🖼️ Screenshots
-
-<p align="center">
-  <img src="docs/screenshot-dark.png" alt="Dark Mode" width="45%">
-  <img src="docs/screenshot-light.png" alt="Light Mode" width="45%">
-</p>
-
 ## 🚀 Quick Start
 
 ### Prerequisites

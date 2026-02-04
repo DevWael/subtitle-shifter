@@ -1,7 +1,11 @@
 /**
  * Subtitle Shifter - Frontend Application
  * Handles file upload, shift operations, and UI state management
+ * Supports both Electron (desktop) and web browser environments
  */
+
+// Detect environment
+const isElectron = window.electronAPI?.isElectron === true;
 
 // State management
 const state = {
@@ -59,13 +63,8 @@ const elements = {
 // ============================================
 
 function initTheme() {
-    // Check localStorage for saved preference
     const savedTheme = localStorage.getItem('theme');
-
-    // Default to dark mode if no saved preference
-    // Only use light mode if explicitly saved as 'light'
     const isDark = savedTheme !== 'light';
-
     document.documentElement.classList.toggle('dark', isDark);
     updateThemeIcons(isDark);
 }
@@ -90,7 +89,6 @@ function showToast(message, type = 'success') {
     elements.toastIcon.textContent = type === 'success' ? '✓' : '✕';
     elements.toastMessage.textContent = message;
 
-    // Force reflow for animation
     elements.toast.offsetHeight;
     elements.toast.classList.remove('hidden');
 
@@ -104,12 +102,10 @@ function showToast(message, type = 'success') {
 // ============================================
 
 function setupUploadZone() {
-    // Click to upload
     elements.uploadZone.addEventListener('click', () => {
         elements.fileInput.click();
     });
 
-    // Keyboard accessibility
     elements.uploadZone.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -117,14 +113,12 @@ function setupUploadZone() {
         }
     });
 
-    // File input change
     elements.fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             handleFileUpload(e.target.files[0]);
         }
     });
 
-    // Drag and drop
     elements.uploadZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         elements.uploadZone.classList.add('drag-over');
@@ -145,7 +139,6 @@ function setupUploadZone() {
         }
     });
 
-    // Remove file button
     elements.removeFile.addEventListener('click', (e) => {
         e.stopPropagation();
         resetState();
@@ -153,39 +146,51 @@ function setupUploadZone() {
 }
 
 async function handleFileUpload(file) {
-    // Validate file type
     if (!file.name.toLowerCase().endsWith('.srt')) {
         showToast('Please upload an SRT file (.srt)', 'error');
         return;
     }
 
-    // Show loading state
     elements.uploadContent.classList.add('hidden');
     elements.uploadLoading.classList.remove('hidden');
 
     try {
-        const formData = new FormData();
-        formData.append('file', file);
+        let data;
 
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-        });
+        if (isElectron) {
+            // Electron: Read file and send via IPC
+            const content = await readFileAsText(file);
+            data = await window.electronAPI.uploadFile({
+                content,
+                filename: file.name,
+            });
 
-        const data = await response.json();
+            if (data.error) {
+                throw new Error(data.message);
+            }
+        } else {
+            // Web: Use fetch API
+            const formData = new FormData();
+            formData.append('file', file);
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Upload failed');
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Upload failed');
+            }
         }
 
-        // Update state
         state.file = file;
         state.filename = data.filename;
         state.cues = data.cues;
         state.shiftedCues = [];
         state.hasPreview = false;
 
-        // Update UI
         updateFileInfo(data);
         showControlsSection();
 
@@ -200,13 +205,24 @@ async function handleFileUpload(file) {
     }
 }
 
+/**
+ * Read file as text (for Electron mode)
+ */
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+    });
+}
+
 function updateFileInfo(data) {
     elements.fileName.textContent = data.filename;
     elements.cueCount.textContent = data.cueCount;
     elements.duration.textContent = data.duration.end;
     elements.fileInfo.classList.remove('hidden');
 
-    // Update time range defaults
     elements.startTime.value = data.duration.start;
     elements.endTime.value = data.duration.end;
 }
@@ -223,7 +239,6 @@ function resetState() {
     state.shiftedCues = [];
     state.hasPreview = false;
 
-    // Reset UI
     elements.fileInput.value = '';
     elements.fileInfo.classList.add('hidden');
     elements.controlsSection.classList.add('hidden');
@@ -242,11 +257,9 @@ function setupModeSelection() {
             const mode = option.dataset.mode;
             state.mode = mode;
 
-            // Update active state
             elements.modeOptions.forEach(opt => opt.classList.remove('active'));
             option.classList.add('active');
 
-            // Toggle time range section
             elements.timeRangeSection.classList.toggle('hidden', mode !== 'partial');
         });
     });
@@ -285,7 +298,6 @@ async function handlePreview() {
         return;
     }
 
-    // Validate time range for partial shift
     if (state.mode === 'partial') {
         const startTime = elements.startTime.value.trim();
         const endTime = elements.endTime.value.trim();
@@ -296,30 +308,47 @@ async function handlePreview() {
         }
     }
 
-    // Disable button and show loading
     elements.previewBtn.disabled = true;
     const originalText = elements.previewBtn.innerHTML;
     elements.previewBtn.innerHTML = '<span class="spinner"></span> Processing...';
 
     try {
-        const response = await fetch('/api/shift', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        let data;
+
+        if (isElectron) {
+            // Electron: Use IPC
+            data = await window.electronAPI.shiftSubtitles({
                 cues: state.cues,
                 offsetMs: offset,
                 mode: state.mode,
                 startTime: elements.startTime.value,
                 endTime: elements.endTime.value,
-            }),
-        });
+            });
 
-        const data = await response.json();
+            if (data.error) {
+                throw new Error(data.message);
+            }
+        } else {
+            // Web: Use fetch API
+            const response = await fetch('/api/shift', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cues: state.cues,
+                    offsetMs: offset,
+                    mode: state.mode,
+                    startTime: elements.startTime.value,
+                    endTime: elements.endTime.value,
+                }),
+            });
 
-        if (!response.ok) {
-            throw new Error(data.message || 'Shift failed');
+            data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Shift failed');
+            }
         }
 
         state.shiftedCues = data.cues;
@@ -342,7 +371,6 @@ async function handlePreview() {
 function renderPreview() {
     elements.previewSection.classList.remove('hidden');
 
-    // Count actually shifted items
     const shiftedCount = state.shiftedCues.filter((cue, index) => {
         const original = state.cues[index];
         return cue.startMs !== original.startMs;
@@ -350,7 +378,6 @@ function renderPreview() {
 
     elements.shiftedCount.textContent = shiftedCount;
 
-    // Render preview items (limit to 50 for performance)
     const itemsToShow = state.shiftedCues.slice(0, 50);
 
     elements.previewContainer.innerHTML = itemsToShow.map((cue, index) => {
@@ -376,7 +403,6 @@ function renderPreview() {
     `;
     }).join('');
 
-    // Add "more items" indicator if needed
     if (state.shiftedCues.length > 50) {
         elements.previewContainer.innerHTML += `
       <div class="preview-item text-center text-[var(--text-secondary)]">
@@ -385,7 +411,6 @@ function renderPreview() {
     `;
     }
 
-    // Scroll to preview section
     elements.previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -405,46 +430,64 @@ async function handleDownload() {
         return;
     }
 
-    // Disable button and show loading
     elements.downloadBtn.disabled = true;
     const originalText = elements.downloadBtn.innerHTML;
-    elements.downloadBtn.innerHTML = '<span class="spinner"></span> Generating...';
+    elements.downloadBtn.innerHTML = '<span class="spinner"></span> Saving...';
 
     try {
-        const response = await fetch('/api/download', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        if (isElectron) {
+            // Electron: Use native save dialog via IPC
+            const result = await window.electronAPI.downloadFile({
                 cues: state.shiftedCues,
                 filename: state.filename,
-            }),
-        });
+            });
 
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.message || 'Download failed');
+            if (result.canceled) {
+                // User canceled, not an error
+                return;
+            }
+
+            if (result.error) {
+                throw new Error(result.message);
+            }
+
+            showToast('File saved successfully!');
+        } else {
+            // Web: Use fetch and blob download
+            const response = await fetch('/api/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cues: state.shiftedCues,
+                    filename: state.filename,
+                }),
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || 'Download failed');
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = state.filename
+                ? state.filename.replace('.srt', '-shifted.srt')
+                : 'shifted-subtitles.srt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            showToast('Download started!');
         }
-
-        // Get the blob and trigger download
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = state.filename
-            ? state.filename.replace('.srt', '-shifted.srt')
-            : 'shifted-subtitles.srt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-        showToast('Download started!');
 
     } catch (error) {
         console.error('Download error:', error);
-        showToast(error.message || 'Failed to download file', 'error');
+        showToast(error.message || 'Failed to save file', 'error');
     } finally {
         elements.downloadBtn.disabled = false;
         elements.downloadBtn.innerHTML = originalText;
@@ -461,17 +504,22 @@ function init() {
     setupModeSelection();
     setupQuickButtons();
 
-    // Event listeners
     elements.themeToggle.addEventListener('click', toggleTheme);
     elements.previewBtn.addEventListener('click', handlePreview);
     elements.downloadBtn.addEventListener('click', handleDownload);
 
-    // Handle enter key in offset input
     elements.offsetInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             handlePreview();
         }
     });
+
+    // Log environment for debugging
+    if (isElectron) {
+        console.log('🖥️ Running in Electron (Desktop Mode)');
+    } else {
+        console.log('🌐 Running in Web Browser Mode');
+    }
 }
 
 // Start the app

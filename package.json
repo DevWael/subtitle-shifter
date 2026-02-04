@@ -1,8 +1,8 @@
 {
   "name": "subtitle-shifter",
   "version": "1.0.0",
-  "description": "A web application to shift SRT subtitle timings",
-  "main": "server.js",
+  "description": "A desktop application to shift SRT subtitle timings",
+  "main": "main.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
@@ -10,13 +10,17 @@
     "dev:server": "nodemon server.js",
     "css:build": "tailwindcss -i ./public/css/input.css -o ./public/css/styles.css",
     "css:watch": "tailwindcss -i ./public/css/input.css -o ./public/css/styles.css --watch",
-    "build": "npm run css:build"
+    "build": "npm run css:build",
+    "electron": "electron .",
+    "electron:build": "npm run css:build && electron-builder",
+    "electron:build:all": "npm run css:build && electron-builder -mwl"
   },
   "keywords": [
     "subtitle",
     "srt",
     "time-shift",
-    "sync"
+    "sync",
+    "desktop"
   ],
   "author": "Ahmad Wael",
   "license": "MIT",
@@ -27,11 +31,47 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.17",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
     "nodemon": "^3.0.3",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "build": {
+    "appId": "com.bbioon.subtitle-shifter",
+    "productName": "Subtitle Shifter",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "public/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    }
   }
 }

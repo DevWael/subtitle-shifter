@@ -470,40 +470,68 @@ function renderPreview() {
 
     elements.shiftedCount.textContent = shiftedCount;
 
-    const itemsToShow = state.shiftedCues.slice(0, 50);
+    // Reset preview state
+    state.previewRenderedCount = 0;
+    elements.previewContainer.innerHTML = '';
 
-    elements.previewContainer.innerHTML = itemsToShow.map((cue, index) => {
-        const original = state.cues[index];
-        const isShifted = cue.startMs !== original.startMs;
-
-        return `
-      <div class="preview-item fade-in" style="animation-delay: ${index * 20}ms">
-        <div class="flex items-start gap-4">
-          <span class="text-sm text-[var(--text-secondary)] font-mono w-8">#${cue.index}</span>
-          <div class="flex-1">
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-              ${isShifted ? `<span class="timestamp original">${original.start}</span>` : ''}
-              <span class="timestamp">${cue.start}</span>
-              <span class="text-[var(--text-secondary)]">→</span>
-              <span class="timestamp">${cue.end}</span>
-              ${isShifted ? '<span class="text-xs text-[var(--accent)]">✓ shifted</span>' : ''}
-            </div>
-            <p class="text-sm text-[var(--text-secondary)]">${escapeHtml(cue.text).replace(/\n/g, '<br>')}</p>
-          </div>
-        </div>
-      </div>
-    `;
-    }).join('');
-
-    if (state.shiftedCues.length > 50) {
-        elements.previewContainer.innerHTML += `
-      <div class="preview-item text-center text-[var(--text-secondary)]">
-        ... and ${state.shiftedCues.length - 50} more subtitles
-      </div>
-    `;
-    }
+    // Load initial batch
+    loadMorePreviewItems(30);
 
     elements.previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Load more preview items (infinite scroll)
+ */
+function loadMorePreviewItems(count = 20) {
+    const startIndex = state.previewRenderedCount;
+    const endIndex = Math.min(startIndex + count, state.shiftedCues.length);
+
+    if (startIndex >= state.shiftedCues.length) return;
+
+    const fragment = document.createDocumentFragment();
+
+    for (let i = startIndex; i < endIndex; i++) {
+        const cue = state.shiftedCues[i];
+        const original = state.cues[i];
+        const isShifted = cue.startMs !== original.startMs;
+
+        const div = document.createElement('div');
+        div.className = 'preview-item fade-in';
+        div.innerHTML = `
+          <div class="flex items-start gap-4">
+            <span class="text-sm text-[var(--text-secondary)] font-mono w-8">#${cue.index}</span>
+            <div class="flex-1">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                ${isShifted ? `<span class="timestamp original">${original.start}</span>` : ''}
+                <span class="timestamp">${cue.start}</span>
+                <span class="text-[var(--text-secondary)]">→</span>
+                <span class="timestamp">${cue.end}</span>
+                ${isShifted ? '<span class="text-xs text-[var(--accent)]">✓ shifted</span>' : ''}
+              </div>
+              <p class="text-sm text-[var(--text-secondary)]">${escapeHtml(cue.text).replace(/\n/g, '<br>')}</p>
+            </div>
+          </div>
+        `;
+        fragment.appendChild(div);
+    }
+
+    elements.previewContainer.appendChild(fragment);
+    state.previewRenderedCount = endIndex;
+}
+
+/**
+ * Setup infinite scroll for preview
+ */
+function setupPreviewScroll() {
+    elements.previewContainer.addEventListener('scroll', () => {
+        const { scrollTop, scrollHeight, clientHeight } = elements.previewContainer;
+
+        // Load more when within 100px of the bottom
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+            loadMorePreviewItems(20);
+        }
+    });
 }
 
 function escapeHtml(text) {
@@ -595,6 +623,7 @@ function init() {
     setupUploadZone();
     setupModeSelection();
     setupRangeSliders();
+    setupPreviewScroll();
     setupQuickButtons();
 
     elements.themeToggle.addEventListener('click', toggleTheme);

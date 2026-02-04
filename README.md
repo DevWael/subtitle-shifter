@@ -1,6 +1,6 @@
 # 🎬 Subtitle Shifter
 
-A modern web application to adjust SRT subtitle timings. Shift entire files or specific portions with an intuitive, privacy-focused interface.
+A modern web application to adjust SRT subtitle timings. Shift entire files or specific portions with an intuitive, privacy-focused interface, works on windows, linux and mac.
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)

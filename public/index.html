@@ -1,219 +1,187 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Subtitle Shifter - Easily adjust SRT subtitle timings online. Shift entire files or specific portions with our modern, privacy-focused tool.">
-  <title>Subtitle Shifter - Adjust SRT Subtitle Timings</title>
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <meta name="description" content="Subtitle Shifter - Easily adjust SRT subtitle timings.">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://fonts.googleapis.com;">
+  <title>Subtitle Shifter</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 </head>
-<body class="min-h-screen">
-  <div class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="py-6 px-4 sm:px-6 lg:px-8">
-      <div class="max-w-4xl mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <span class="text-3xl">🎬</span>
-          <h1 class="text-xl sm:text-2xl font-bold">Subtitle Shifter</h1>
-        </div>
-        
-        <!-- Theme Toggle -->
-        <button id="themeToggle" class="p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors" aria-label="Toggle theme">
-          <svg id="sunIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-          <svg id="moonIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-          </svg>
-        </button>
-      </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 px-4 sm:px-6 lg:px-8 pb-8">
-      <div class="max-w-4xl mx-auto space-y-6">
-        
-        <!-- Upload Section -->
-        <section id="uploadSection" class="card fade-in">
-          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-            <span class="text-xl">📁</span>
-            Upload Subtitle File
-          </h2>
-          
-          <div 
-            id="uploadZone" 
-            class="upload-zone"
-            role="button"
-            tabindex="0"
-            aria-label="Drop an SRT file or click to browse"
-          >
-            <input 
-              type="file" 
-              id="fileInput" 
-              accept=".srt" 
-              class="hidden"
-              aria-hidden="true"
-            >
-            <div id="uploadContent" class="space-y-4">
-              <div class="text-4xl">📤</div>
-              <div>
-                <p class="text-lg font-medium">Drop your .srt file here</p>
-                <p class="text-sm text-[var(--text-secondary)] mt-1">or click to browse</p>
-              </div>
-            </div>
-            <div id="uploadLoading" class="hidden space-y-4">
-              <div class="spinner mx-auto"></div>
-              <p>Processing file...</p>
-            </div>
-          </div>
-
-          <!-- File Info (shown after upload) -->
-          <div id="fileInfo" class="hidden mt-4 flex flex-wrap items-center gap-3">
-            <span class="file-badge">
-              <span id="fileName">filename.srt</span>
-              <button id="removeFile" class="hover:text-red-400 transition-colors" aria-label="Remove file">
-                ✕
-              </button>
-            </span>
-            <span class="text-sm text-[var(--text-secondary)]">
-              <span id="cueCount">0</span> subtitles • 
-              Duration: <span id="duration">00:00:00</span>
-            </span>
-          </div>
-        </section>
-
-        <!-- Controls Section (hidden until file uploaded) -->
-        <section id="controlsSection" class="card hidden slide-up">
-          <h2 class="text-lg font-semibold mb-6 flex items-center gap-2">
-            <span class="text-xl">⚙️</span>
-            Shift Settings
-          </h2>
-
-          <!-- Mode Selection -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium mb-3 text-[var(--text-secondary)]">Shift Mode</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <label class="mode-option active" data-mode="full">
-                <input type="radio" name="shiftMode" value="full" checked class="sr-only">
-                <div>
-                  <div class="font-semibold">Full Shift</div>
-                  <div class="text-sm text-[var(--text-secondary)]">Shift all subtitles</div>
-                </div>
-              </label>
-              <label class="mode-option" data-mode="partial">
-                <input type="radio" name="shiftMode" value="partial" class="sr-only">
-                <div>
-                  <div class="font-semibold">Partial Shift</div>
-                  <div class="text-sm text-[var(--text-secondary)]">Shift a specific range</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Time Range (for partial shift) -->
-          <div id="timeRangeSection" class="hidden mb-6 p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)]">
-            <label class="block text-sm font-medium mb-3 text-[var(--text-secondary)]">Time Range</label>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label for="startTime" class="block text-xs text-[var(--text-secondary)] mb-1">Start Time</label>
-                <input 
-                  type="text" 
-                  id="startTime" 
-                  class="input font-mono" 
-                  placeholder="00:00:00,000"
-                  pattern="[0-9:,.]+"
-                >
-              </div>
-              <div>
-                <label for="endTime" class="block text-xs text-[var(--text-secondary)] mb-1">End Time</label>
-                <input 
-                  type="text" 
-                  id="endTime" 
-                  class="input font-mono" 
-                  placeholder="01:00:00,000"
-                  pattern="[0-9:,.]+"
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- Offset Input -->
-          <div class="mb-6">
-            <label for="offsetInput" class="block text-sm font-medium mb-3 text-[var(--text-secondary)]">
-              Time Offset (milliseconds)
-            </label>
-            <div class="flex gap-4">
-              <input 
-                type="number" 
-                id="offsetInput" 
-                class="input flex-1 font-mono" 
-                placeholder="Enter offset (e.g., 500 or -500)"
-                step="100"
-              >
-              <div class="flex gap-2">
-                <button id="quickMinus500" class="btn-secondary text-sm px-3">-500ms</button>
-                <button id="quickPlus500" class="btn-secondary text-sm px-3">+500ms</button>
-              </div>
-            </div>
-            <p class="mt-2 text-xs text-[var(--text-secondary)]">
-              Positive = delay subtitles • Negative = show earlier
-            </p>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex flex-wrap gap-4">
-            <button id="previewBtn" class="btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2">
-              <span>👁️</span> Preview
-            </button>
-            <button id="downloadBtn" class="btn-secondary flex-1 sm:flex-none flex items-center justify-center gap-2" disabled>
-              <span>📥</span> Download
-            </button>
-          </div>
-        </section>
-
-        <!-- Preview Section (hidden until preview generated) -->
-        <section id="previewSection" class="card hidden slide-up">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold flex items-center gap-2">
-              <span class="text-xl">👁️</span>
-              Preview
-            </h2>
-            <span id="previewStats" class="text-sm text-[var(--text-secondary)]">
-              Showing <span id="shiftedCount">0</span> shifted subtitles
-            </span>
-          </div>
-          
-          <div id="previewContainer" class="preview-container scrollbar-thin">
-            <!-- Preview items will be inserted here -->
-          </div>
-        </section>
-
-      </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="py-6 px-4 text-center text-sm text-[var(--text-secondary)] border-t border-[var(--border)]">
-      <p>
-        Subtitle Shifter • Built with ❤️ •
-        <a href="https://www.bbioon.com" target="_blank" rel="noopener" class="hover:text-[var(--accent)] transition-colors">
-          bbioon.com
-        </a>
-      </p>
-      <p class="mt-1 text-xs">
-        Your files are processed locally and never stored on our servers.
-      </p>
-    </footer>
+<body>
+  <!-- Title Bar -->
+  <div class="titlebar">
+    <div class="flex items-center gap-2 pl-16">
+      <span class="text-lg">🎬</span>
+      <span class="text-sm font-semibold">Subtitle Shifter</span>
+    </div>
+    <div class="titlebar-buttons">
+      <button id="themeToggle" class="p-1.5 rounded hover:bg-[var(--bg-secondary)] transition-colors"
+        aria-label="Toggle theme">
+        <svg id="sunIcon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg id="moonIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+    </div>
   </div>
+
+  <!-- Main Content -->
+  <main class="app-content scrollbar-thin">
+    <div class="p-4 space-y-4 max-w-2xl mx-auto">
+
+      <!-- Upload Section -->
+      <section id="uploadSection" class="card fade-in">
+        <h2 class="section-header">
+          <span class="icon">📁</span>
+          Upload File
+        </h2>
+
+        <div id="uploadZone" class="upload-zone" role="button" tabindex="0"
+          aria-label="Drop an SRT file or click to browse">
+          <input type="file" id="fileInput" accept=".srt" class="hidden" aria-hidden="true">
+          <div id="uploadContent" class="space-y-2">
+            <div class="text-2xl">📤</div>
+            <div>
+              <p class="text-sm font-medium">Drop your .srt file here</p>
+              <p class="text-xs text-[var(--text-secondary)]">or click to browse</p>
+            </div>
+          </div>
+          <div id="uploadLoading" class="hidden space-y-2">
+            <div class="spinner mx-auto"></div>
+            <p class="text-sm">Processing...</p>
+          </div>
+        </div>
+
+        <!-- File Info (shown after upload) -->
+        <div id="fileInfo" class="hidden mt-3 flex flex-wrap items-center gap-2">
+          <span class="file-badge">
+            <span id="fileName">filename.srt</span>
+            <button id="removeFile" class="hover:text-red-400 transition-colors" aria-label="Remove file">
+              ✕
+            </button>
+          </span>
+          <span class="text-xs text-[var(--text-secondary)]">
+            <span id="cueCount">0</span> subtitles •
+            <span id="duration">00:00:00</span>
+          </span>
+        </div>
+      </section>
+
+      <!-- Controls Section (hidden until file uploaded) -->
+      <section id="controlsSection" class="card hidden slide-up">
+        <h2 class="section-header">
+          <span class="icon">⚙️</span>
+          Settings
+        </h2>
+
+        <!-- Mode Selection -->
+        <div class="mb-4">
+          <label class="label">Shift Mode</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="mode-option active" data-mode="full">
+              <input type="radio" name="shiftMode" value="full" checked class="sr-only">
+              <div>
+                <div class="font-medium text-sm">Full Shift</div>
+                <div class="text-xs text-[var(--text-secondary)]">All subtitles</div>
+              </div>
+            </label>
+            <label class="mode-option" data-mode="partial">
+              <input type="radio" name="shiftMode" value="partial" class="sr-only">
+              <div>
+                <div class="font-medium text-sm">Partial Shift</div>
+                <div class="text-xs text-[var(--text-secondary)]">Specific range</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Time Range (for partial shift) -->
+        <div id="timeRangeSection"
+          class="hidden mb-4 p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)]">
+          <div class="flex items-center justify-between mb-2">
+            <label class="label mb-0">Time Range</label>
+            <span class="text-xs font-mono text-[var(--text-secondary)]">
+              <span id="startTimeDisplay">00:00:00</span> — <span id="endTimeDisplay">00:00:00</span>
+            </span>
+          </div>
+          <div class="range-slider-container">
+            <div class="range-track">
+              <div id="rangeFill" class="range-fill"></div>
+            </div>
+            <input type="range" id="startTimeRange" class="range-thumb range-thumb-start" min="0" max="100" value="0">
+            <input type="range" id="endTimeRange" class="range-thumb range-thumb-end" min="0" max="100" value="100">
+          </div>
+          <!-- Hidden inputs for form submission -->
+          <input type="hidden" id="startTime" value="">
+          <input type="hidden" id="endTime" value="">
+        </div>
+
+        <!-- Offset Input -->
+        <div class="mb-4">
+          <label for="offsetInput" class="label">
+            Offset (milliseconds)
+          </label>
+          <div class="flex gap-2">
+            <input type="number" id="offsetInput" class="input flex-1 font-mono" placeholder="e.g., 500 or -500"
+              step="100">
+            <button id="quickMinus500" class="btn-secondary text-xs px-2">-500</button>
+            <button id="quickPlus500" class="btn-secondary text-xs px-2">+500</button>
+          </div>
+          <p class="mt-1 text-xs text-[var(--text-secondary)]">
+            + delay • − advance
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <button id="previewBtn" class="btn-primary flex-1 flex items-center justify-center gap-1.5">
+            <span>👁️</span> Preview
+          </button>
+          <button id="downloadBtn" class="btn-secondary flex-1 flex items-center justify-center gap-1.5" disabled>
+            <span>💾</span> Save
+          </button>
+        </div>
+      </section>
+
+      <!-- Preview Section (hidden until preview generated) -->
+      <section id="previewSection" class="card hidden slide-up">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="section-header mb-0">
+            <span class="icon">👁️</span>
+            Preview
+          </h2>
+          <span id="previewStats" class="text-xs text-[var(--text-secondary)]">
+            <span id="shiftedCount">0</span> shifted
+          </span>
+        </div>
+
+        <div id="previewContainer" class="preview-container scrollbar-thin selectable">
+          <!-- Preview items will be inserted here -->
+        </div>
+      </section>
+
+    </div>
+  </main>
 
   <!-- Toast Notification -->
   <div id="toast" class="toast hidden" role="alert" aria-live="polite">
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
       <span id="toastIcon">✓</span>
       <span id="toastMessage">Success!</span>
     </div>
   </div>
 
-  <script src="/js/app.js" type="module"></script>
+  <script src="js/app.js" type="module"></script>
 </body>
+
 </html>
